@@ -1,0 +1,98 @@
+lua
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local ESPEnabled = false
+local AimbotEnabled = false
+
+local Window = OrionLib:MakeWindow({Name = "Rivals Exploit GUI", HidePremium = false, SaveConfig = true, IntroText = "Welcome to Rivals Exploit"})
+
+local MainTab = Window:MakeTab({
+Name = "Main",
+Icon = "rbxassetid://4483345998",
+PremiumOnly = false
+})
+
+MainTab:AddToggle({
+Name = "ESP",
+Default = false,
+Callback = function(value)
+ESPEnabled = value
+toggleESP(value)
+end
+})
+
+MainTab:AddToggle({
+Name = "Aimbot",
+Default = false,
+Callback = function(value)
+AimbotEnabled = value
+end
+})
+
+function toggleESP(state)
+if state then
+for _, player in pairs(Players:GetPlayers()) do
+if player ~= LocalPlayer then
+addESP(player)
+end
+end
+Players.PlayerAdded:Connect(addESP)
+Players.PlayerRemoving:Connect(removeESP)
+else
+for _, player in pairs(Players:GetPlayers()) do
+if player ~= LocalPlayer then
+removeESP(player)
+end
+end
+end
+end
+
+function addESP(player)
+local highlight = Instance.new("Highlight")
+highlight.Parent = player.Character
+highlight.Adornee = player.Character
+highlight.FillColor = Color3.new(1, 0, 0)
+highlight.OutlineColor = Color3.new(0, 1, 0)
+highlight.OutlineTransparency = 0.5
+end
+
+function removeESP(player)
+if player and player.Character then
+for _, obj in pairs(player.Character:GetChildren()) do
+if obj:IsA("Highlight") then
+obj:Destroy()
+end
+end
+end
+end
+
+RunService.RenderStepped:Connect(function()
+if AimbotEnabled then
+local closestPlayer = getClosestPlayer()
+if closestPlayer then
+local mouse = LocalPlayer:GetMouse()
+mouse.Hit = closestPlayer.Character.Head.CFrame
+end
+end
+end)
+
+function getClosestPlayer()
+local closestDistance = math.huge
+local closestPlayer = nil
+
+for _, player in pairs(Players:GetPlayers()) doif player ~= LocalPlayer and player.Team ~= LocalPlayer.Team and player.Character and player.Character:FindFirstChild("Head") then
+local distance = (player.Character.Head.Position - LocalPlayer.Character.Head.Position).magnitude
+if distance < closestDistance then
+closestDistance = distance
+closestPlayer = player
+end
+end
+end
+
+return closestPlayer
+end
+
+OrionLib:Init()
